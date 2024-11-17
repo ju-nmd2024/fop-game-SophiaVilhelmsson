@@ -1,17 +1,24 @@
-createCanvas(700, 500);
+function setup() {
+  createCanvas(700, 500);
+}
 noStroke();
 
 let x = 350;
 let y = 250;
-let s = 1.0;
-let gameState = true;
-let state = "Start";
+const s = 1.0;
+let velocity = 0.6;
+let gravity = 0.15;
 let characterX = 350;
 let characterY = 250;
-let velocity = 0.6;
-let velocityY = 0.2;
-let gravity = 0.15;
-let acceleration = 0.001;
+let gameState = true;
+let state = "start";
+let shadowWidth = 0;
+let shadowHeight = 0;
+
+let skyColor = color(204, 255, 255);
+let flowerColor = color(255, 153, 204);
+let sunColor = color(255, 255, 204);
+let grassColor = color(153, 255, 153);
 
 function madicken(x, y) {
   //umbrella
@@ -28,7 +35,7 @@ function madicken(x, y) {
   line(x - 10 * s, y - 70 * s, x - 50 * s, y - 150 * s);
   pop();
 
-  //hair
+  //hair length
   fill(153, 76, 0);
   rect(x - 75 * s, y - 85 * s, 50 * s, 60 * s, 20 * s);
 
@@ -36,7 +43,7 @@ function madicken(x, y) {
   fill(255, 205, 153);
   ellipse(x - 50 * s, y - 75 * s, 50 * s, 55 * s);
 
-  //hair
+  //hair bangs
   push();
   translate(x - 36 * s, y - 95 * s);
   rotate(2.4);
@@ -84,7 +91,7 @@ function madicken(x, y) {
   rect(x - 75 * s, y + 65 * s, 20 * s, 10 * s, 80 * s);
   rect(x - 45 * s, y + 65 * s, 20 * s, 10 * s, 80 * s);
 
-  //arms
+  //arm
   push();
   strokeWeight(10 * s);
   stroke(255, 205, 153);
@@ -106,8 +113,59 @@ function madicken(x, y) {
   rect(x - 75 * s, y + 2 * s, 51 * s, 5 * s);
 }
 
-function house() {
-  //house
+function background() {
+  //sky
+  fill(204, 255, 255);
+  rect(x + y - 600, 0, 700);
+
+  //sun
+  fill(255, 255, 204);
+  ellipse(x - 285, y - 200, 70, 70);
+
+  //grass
+  fill(153, 255, 153);
+  rect(x - 600 + y, 400, 700);
+
+  //stems
+  push();
+  stroke(0, 204, 0);
+  strokeWeight(3);
+  line(x - 310, y + 115, x - 310, y + 150);
+  line(x - 210, y + 115, x - 210, y + 150);
+  line(x - 260, y + 115, x - 260, y + 150);
+  pop();
+
+  //flower 1
+  fill(255, 153, 204);
+  ellipse(x - 310, y + 105, 15, 15);
+  ellipse(x - 320, y + 115, 15, 15);
+  ellipse(x - 310, y + 125, 15, 15);
+  ellipse(x - 300, y + 115, 15, 15);
+
+  fill(255, 255, 0);
+  ellipse(x - 310, y + 115, 10, 10);
+
+  //flower 2
+  fill(204, 153, 255);
+  ellipse(x - 260, y + 105, 15, 15);
+  ellipse(x - 270, y + 115, 15, 15);
+  ellipse(x - 260, y + 125, 15, 15);
+  ellipse(x - 250, y + 115, 15, 15);
+
+  fill(255, 255, 0);
+  ellipse(x - 260, y + 115, 10, 10);
+
+  //flower 3
+  fill(255, 153, 204);
+  ellipse(x - 210, y + 105, 15, 15);
+  ellipse(x - 220, y + 115, 15, 15);
+  ellipse(x - 210, y + 125, 15, 15);
+  ellipse(x - 200, y + 115, 15, 15);
+
+  fill(255, 255, 0);
+  ellipse(x - 210, y + 115, 10, 10);
+
+  //house walls
   fill(255, 51, 51);
   rect(x + 50 * s + y - 150 * s, 200, 200);
 
@@ -141,15 +199,35 @@ function house() {
 
   fill(0, 0, 0);
   rect(x + 235 * s, y + 120 * s, 10, 3);
+
+  if (state === "lost") {
+    skyColor = (200, 200, 200);
+  }
+  if (state !== "lost") {
+    skyColor = (204, 255, 255);
+  }
+  if (state === "lost") {
+    flowerColor = (25, 15, 204);
+  }
+  if (state !== "lost") {
+    flowerColor = (255, 153, 204);
+  }
+  if (state === "lost") {
+    sunColor = (255, 255, 255);
+  }
+  if (state !== "lost") {
+    sunColor = (255, 255, 204);
+  }
+  if (state === "lost") {
+    grassColor = (15, 155, 15);
+  }
+  if (state !== "lost") {
+    grassColor = (153, 255, 153);
+  }
 }
 
 function startScreen() {
   background(204, 255, 255);
-  house();
-
-  //grass
-  fill(153, 255, 153);
-  rect(x - 600 + y, 400, 700);
 
   push();
   strokeWeight(2);
@@ -158,16 +236,14 @@ function startScreen() {
   rect(x - 100, y - 25, 200, 50, 20);
   pop();
 
+  //button "play game"
   fill(0, 0, 0);
   textSize(20);
   textFont("Arial");
-  let course = "Play";
-  let attribute = "game";
-  let sentence = course + " " + attribute;
+  text("Play game", 300, 255);
 
-  text(sentence, 300, 255);
-
-  madicken(180, characterY - 300);
+  //character motion vertically
+  madicken(characterX - 170, characterY - 100);
   if (gameState === true) {
     characterY = characterY + 1;
 
@@ -178,198 +254,39 @@ function startScreen() {
 }
 
 function gameScreen(x, y) {
-  //sky
-  fill(204, 255, 255);
-  rect(x + y - 600, 0, 700);
+  background();
 
-  //sun
-  fill(255, 255, 204);
-  ellipse(x - 285, y - 200, 70, 70);
-
-  //house
-  fill(255, 51, 51);
-  rect(x + 50 + y - 150, 200, 200);
-
-  //roof
-  fill(0, 0, 0);
-  triangle(x + 150, y - 50, x + 250, y - 160, x + 350, y - 50);
-
-  //windows
-  fill(255, 255, 255);
-  rect(x + 182, y - 5, 50, 50);
-  fill(0, 0, 0);
-  rect(x + 205, y - 5, 3, 50);
-  rect(x + 182, y + 18, 50, 3);
-
-  fill(255, 255, 255);
-  rect(x + 275, y - 5, 50, 50);
-  fill(0, 0, 0);
-  rect(x + 298, y - 5, 3, 50);
-  rect(x + 275, y + 18, 50, 3);
-
-  //door
-  fill(255, 255, 255);
-  rect(x + 230, y + 85, 50, 70);
-
-  fill(0, 0, 0);
-  rect(x + 235, y + 120, 10, 3);
-
-  //grass
-  fill(153, 255, 153);
-  rect(x - 600 + y, 400, 700);
-
-  //stems
-  push();
-  stroke(0, 204, 0);
-  strokeWeight(3);
-  line(x - 310, y + 115, x - 310, y + 150);
-  line(x - 210, y + 115, x - 210, y + 150);
-  line(x - 260, y + 115, x - 260, y + 150);
-  pop();
-
-  //flower 1
-  fill(255, 153, 204);
-  ellipse(x - 310, y + 105, 15, 15);
-  ellipse(x - 320, y + 115, 15, 15);
-  ellipse(x - 310, y + 125, 15, 15);
-  ellipse(x - 300, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 310, y + 115, 10, 10);
-
-  //flower 2
-  fill(204, 153, 255);
-  ellipse(x - 260, y + 105, 15, 15);
-  ellipse(x - 270, y + 115, 15, 15);
-  ellipse(x - 260, y + 125, 15, 15);
-  ellipse(x - 250, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 260, y + 115, 10, 10);
-
-  //flower 3
-  fill(255, 153, 204);
-  ellipse(x - 210, y + 105, 15, 15);
-  ellipse(x - 220, y + 115, 15, 15);
-  ellipse(x - 210, y + 125, 15, 15);
-  ellipse(x - 200, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 210, y + 115, 10, 10);
-
-  //shadow
+  //landing shadow
   fill(0, 110, 0);
-  ellipse(300, 420, 100, 10);
+  ellipse(300, 420, shadowWidth, shadowHeight);
 
-  madicken(350, characterY);
+  //character motion up&down
+  madicken(characterX, characterY, 0.9);
   if (gameState === true) {
     if (keyIsDown(32)) {
-      gravity = -0.3;
+      gravity = -1;
     } else {
       gravity = 0.1;
     }
-    velocity = velocityY + gravity;
-    y = y + velocity;
+    velocity = velocity + gravity;
+    characterY = characterY + velocity;
+
+    shadowWidth = (characterY / 750) * 200;
+    shadowHeight = (characterY / 750) * 40;
   }
-  if (y > 400) {
+  if (y > 345) {
     gameState = false;
-  }
-
-  if (characterY <= 345) {
-    characterY = characterY + 2;
-  }
-
-  if (characterY > 345 && velocity > 4) {
-    state = "ResultYourDead";
-  }
-  if (characterY > 345 && velocity < 4) {
-    state = "ResultYouWin";
   }
 }
 
 function deadScreen() {
-  //sky
-  fill(200);
-  rect(x + y - 600, 0, 700);
+  background();
 
-  //sun
-  fill(255, 255, 255);
-  ellipse(x - 285, y - 200, 70, 70);
-
-  //house
-  fill(255, 51, 51);
-  rect(x + 50 + y - 150, 200, 200);
-
-  //roof
-  fill(0, 0, 0);
-  triangle(x + 150, y - 50, x + 250, y - 160, x + 350, y - 50);
-
-  //windows
-  fill(255, 255, 255);
-  rect(x + 182, y - 5, 50, 50);
-  fill(0, 0, 0);
-  rect(x + 205, y - 5, 5, 50);
-  rect(x + 182, y + 18, 50, 5);
-
-  fill(255, 255, 255);
-  rect(x + 275, y - 5, 50, 50);
-  fill(0, 0, 0);
-  rect(x + 298, y - 5, 5, 50);
-  rect(x + 275, y + 18, 50, 5);
-
-  //door
-  fill(255, 255, 255);
-  rect(x + 230, y + 85, 50, 70);
-
-  fill(0, 0, 0);
-  rect(x + 235, y + 120, 10, 5);
-
-  //grass
-  fill(15, 155, 15);
-  rect(x - 600 + y, 400, 700);
-
-  //stems
-  push();
-  stroke(0, 204, 0);
-  strokeWeight(3);
-  line(x - 310, y + 115, x - 310, y + 150);
-  line(x - 210, y + 115, x - 210, y + 150);
-  line(x - 260, y + 115, x - 260, y + 150);
-  pop();
-
-  //flower 1
-  fill(255, 153, 20);
-  ellipse(x - 310, y + 105, 15, 15);
-  ellipse(x - 320, y + 115, 15, 15);
-  ellipse(x - 310, y + 125, 15, 15);
-  ellipse(x - 300, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 310, y + 115, 10, 10);
-
-  //flower 2
-  fill(20, 153, 255);
-  ellipse(x - 260, y + 105, 15, 15);
-  ellipse(x - 270, y + 115, 15, 15);
-  ellipse(x - 260, y + 125, 15, 15);
-  ellipse(x - 250, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 260, y + 115, 10, 10);
-
-  //flower 3
-  fill(255, 15, 204);
-  ellipse(x - 210, y + 105, 15, 15);
-  ellipse(x - 220, y + 115, 15, 15);
-  ellipse(x - 210, y + 125, 15, 15);
-  ellipse(x - 200, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 210, y + 115, 10, 10);
-
+  //blood
   fill(255, 0, 0);
   ellipse(300, 400, 120, 20);
 
+  //umbrella cover the character
   push();
   translate(x - 50 * s, y + 100 * s);
   rotate(PI);
@@ -384,116 +301,29 @@ function deadScreen() {
   rect(x - 100, y - 25, 200, 50, 20);
   pop();
 
+  //button "Play again"
   fill(0, 0, 0);
   textSize(20);
   textFont("Arial");
-  let course = "Play";
-  let attribute = "again";
-  let sentence = course + " " + attribute;
+  text("Play again", 300, 255);
 
-  text(sentence, 300, 255);
-
+  //result text "You crashed"
   fill(255, 0, 0);
   textSize(75);
   textFont("Arial");
-  let play = "You";
-  let definite = "crashed";
-  let title = play + " " + definite;
-
-  text(title, 100, 150);
+  text("You crashed", 100, 150);
 }
 
 function wonScreen() {
-  //sky
-  fill(204, 255, 255);
-  rect(x + y - 600, 0, 700);
+  background();
 
-  //sun
-  fill(255, 255, 204);
-  ellipse(x - 285, y - 200, 70, 70);
-
-  //house
-  fill(255, 51, 51);
-  rect(x + 50 + y - 150, 200, 200);
-
-  //roof
-  fill(0, 0, 0);
-  triangle(x + 150, y - 50, x + 250, y - 160, x + 350, y - 50);
-
-  //windows
-  fill(255, 255, 255);
-  rect(x + 182, y - 5, 50, 50);
-  fill(0, 0, 0);
-  rect(x + 205, y - 5, 3, 50);
-  rect(x + 182, y + 18, 50, 3);
-
-  fill(255, 255, 255);
-  rect(x + 275, y - 5, 50, 50);
-  fill(0, 0, 0);
-  rect(x + 298, y - 5, 3, 50);
-  rect(x + 275, y + 18, 50, 3);
-
-  //door
-  fill(255, 255, 255);
-  rect(x + 230, y + 85, 50, 70);
-
-  fill(0, 0, 0);
-  rect(x + 235, y + 120, 10, 3);
-
-  //grass
-  fill(153, 255, 153);
-  rect(x - 600 + y, 400, 700);
-
-  //stems
-  push();
-  stroke(0, 204, 0);
-  strokeWeight(3);
-  line(x - 310, y + 115, x - 310, y + 150);
-  line(x - 210, y + 115, x - 210, y + 150);
-  line(x - 260, y + 115, x - 260, y + 150);
-  pop();
-
-  //flower 1
-  fill(255, 153, 204);
-  ellipse(x - 310, y + 105, 15, 15);
-  ellipse(x - 320, y + 115, 15, 15);
-  ellipse(x - 310, y + 125, 15, 15);
-  ellipse(x - 300, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 310, y + 115, 10, 10);
-
-  //flower 2
-  fill(204, 153, 255);
-  ellipse(x - 260, y + 105, 15, 15);
-  ellipse(x - 270, y + 115, 15, 15);
-  ellipse(x - 260, y + 125, 15, 15);
-  ellipse(x - 250, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 260, y + 115, 10, 10);
-
-  //flower 3
-  fill(255, 153, 204);
-  ellipse(x - 210, y + 105, 15, 15);
-  ellipse(x - 220, y + 115, 15, 15);
-  ellipse(x - 210, y + 125, 15, 15);
-  ellipse(x - 200, y + 115, 15, 15);
-
-  fill(255, 255, 0);
-  ellipse(x - 210, y + 115, 10, 10);
-
+  //result text "You won"
   fill(0, 255, 0);
   textSize(80);
   textFont("Arial");
-  let play = "You";
-  let definite = "won!";
-  let title = play + " " + definite;
+  text("You won!", 170, 120);
 
-  text(title, 170, 120);
-
-  //play again
-
+  //button "Play again"
   push();
   strokeWeight(2);
   stroke(0, 0, 0);
@@ -504,60 +334,59 @@ function wonScreen() {
   fill(0, 0, 0);
   textSize(20);
   textFont("Arial");
-  let redo = "Play";
-  let attribute = "again";
-  let sent = redo + " " + attribute;
+  text("Play again", 300, 255);
 
-  text(sent, 300, 255);
-
-  madicken(characterX, characterY + 75);
+  //character slides from right to left
+  madicken(characterX, characterY - 10);
 
   if (characterX >= 200) characterX = characterX - 3;
 }
 
 function draw() {
-  if (state === "Start") {
+  if (state === "start") {
     startScreen();
-  } else if (state === "Game") {
+  } else if (state === "game") {
     gameScreen();
-  } else if (state === "ResultYourDead") {
+  } else if (state === "lost") {
     deadScreen();
-  } else if (state === "ResultYouWin") {
+  } else if (state === "win") {
     wonScreen();
   }
-  if (characterY > 345 && velocity > 4) {
-    state = "ResultYourDead";
+
+  if (characterY > 345 && velocity < 3) {
+    state = "win";
   }
-  if (characterY < 345 && velocity < 4) {
-    state = "ResultYouWin";
+  if (characterY > 345 && velocity > 3) {
+    state = "lost";
   }
 }
 
 function mouseClicked() {
   if (
-    state === "Start" &&
+    state === "start" &&
     mouseX >= x - 100 &&
     mouseX <= x + 100 &&
     mouseY >= y - 15 &&
     mouseY <= y + 30
   ) {
-    state = "Game";
-  } else if (
-    state === "ResultYourDead" &&
-    mouseX >= x - 100 &&
-    mouseX <= x + 100 &&
-    mouseY >= y - 15 &&
-    mouseY <= y + 30
-  ) {
-    state = "Game";
+    state = "game";
   }
   if (
-    state === "ResultYouWin" &&
-    mouseX >= x - 75 &&
-    mouseX <= x + 60 &&
-    mouseY >= y - 80 &&
-    mouseY <= y + 20
+    state === "lost" &&
+    mouseX >= x - 100 &&
+    mouseX <= x + 100 &&
+    mouseY >= y - 15 &&
+    mouseY <= y + 30
   ) {
-    start = "Game";
+    state = "game";
+  }
+  if (
+    state === "win" &&
+    mouseX >= x - 100 &&
+    mouseX <= x + 100 &&
+    mouseY >= y - 15 &&
+    mouseY <= y + 30
+  ) {
+    state = "game";
   }
 }
