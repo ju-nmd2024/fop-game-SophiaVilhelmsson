@@ -4,14 +4,14 @@ noStroke();
 let x = 350;
 let y = 250;
 let s = 1.0;
+let gameState = true;
+let state = "Start";
 let characterX = 350;
 let characterY = 250;
 let velocity = 0.6;
 let velocityY = 0.2;
 let gravity = 0.15;
 let acceleration = 0.001;
-let gameState = true;
-let state = "Start";
 
 function madicken(x, y) {
   //umbrella
