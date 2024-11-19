@@ -1,7 +1,11 @@
 function setup() {
   createCanvas(700, 500);
+  noStroke();
+
+  skyColor = color(204, 255, 255);
+  sunColor = color(255, 255, 204);
+  grassColor = color(153, 255, 153);
 }
-noStroke();
 
 let x = 350;
 let y = 250;
@@ -15,9 +19,9 @@ let state = "start";
 let shadowWidth = 0;
 let shadowHeight = 0;
 
-let skyColor = color(204, 255, 255);
-let sunColor = color(255, 255, 204);
-let grassColor = color(153, 255, 153);
+let skyColor;
+let sunColor;
+let grassColor;
 
 function madicken(x, y) {
   //umbrella
