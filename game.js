@@ -116,7 +116,7 @@ function madicken(x, y) {
   rect(x - 75 * s, y + 2 * s, 51 * s, 5 * s);
 }
 
-function background() {
+function backgroundScene() {
   //sky
   fill(skyColor);
   rect(x + y - 600, 0, 700);
@@ -205,7 +205,7 @@ function background() {
 }
 
 function startScreen() {
-  background(204, 255, 255);
+  backgroundScene();
 
   push();
   strokeWeight(2);
@@ -231,7 +231,7 @@ function startScreen() {
 }
 
 function gameScreen(x, y) {
-  background();
+  backgroundScene();
 
   //landing shadow
   fill(0, 110, 0);
@@ -258,7 +258,7 @@ function gameScreen(x, y) {
 }
 
 function deadScreen() {
-  background();
+  backgroundScene();
 
   //blood
   fill(255, 0, 0);
@@ -304,7 +304,7 @@ function deadScreen() {
 }
 
 function wonScreen() {
-  background();
+  backgroundScene();
 
   //result text "You won"
   fill(0, 255, 0);
