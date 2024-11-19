@@ -9,14 +9,13 @@ const s = 1.0;
 let velocity = 0.6;
 let gravity = 0.15;
 let characterX = 350;
-let characterY = 250;
+let characterY = 0;
 let gameState = true;
 let state = "start";
 let shadowWidth = 0;
 let shadowHeight = 0;
 
 let skyColor = color(204, 255, 255);
-let flowerColor = color(255, 153, 204);
 let sunColor = color(255, 255, 204);
 let grassColor = color(153, 255, 153);
 
@@ -115,15 +114,15 @@ function madicken(x, y) {
 
 function background() {
   //sky
-  fill(204, 255, 255);
+  fill(skyColor);
   rect(x + y - 600, 0, 700);
 
   //sun
-  fill(255, 255, 204);
+  fill(sunColor);
   ellipse(x - 285, y - 200, 70, 70);
 
   //grass
-  fill(153, 255, 153);
+  fill(grassColor);
   rect(x - 600 + y, 400, 700);
 
   //stems
@@ -199,31 +198,6 @@ function background() {
 
   fill(0, 0, 0);
   rect(x + 235 * s, y + 120 * s, 10, 3);
-
-  if (state === "lost") {
-    skyColor = (200, 200, 200);
-  }
-  if (state !== "lost") {
-    skyColor = (204, 255, 255);
-  }
-  if (state === "lost") {
-    flowerColor = (25, 15, 204);
-  }
-  if (state !== "lost") {
-    flowerColor = (255, 153, 204);
-  }
-  if (state === "lost") {
-    sunColor = (255, 255, 255);
-  }
-  if (state !== "lost") {
-    sunColor = (255, 255, 204);
-  }
-  if (state === "lost") {
-    grassColor = (15, 155, 15);
-  }
-  if (state !== "lost") {
-    grassColor = (153, 255, 153);
-  }
 }
 
 function startScreen() {
@@ -242,14 +216,13 @@ function startScreen() {
   textFont("Arial");
   text("Play game", 300, 255);
 
-  //character motion vertically
-  madicken(characterX - 170, characterY - 100);
-  if (gameState === true) {
-    characterY = characterY + 1;
+  //character position motion vertically
+  madicken(characterX - 170, characterY);
 
-    if (characterY < -300) {
-      characterY = height;
-    }
+  if (gameState === true) {
+    characterY = characterY + 4;
+
+    if (characterY > 650) characterY = -100;
   }
 }
 
@@ -261,7 +234,7 @@ function gameScreen(x, y) {
   ellipse(300, 420, shadowWidth, shadowHeight);
 
   //character motion up&down
-  madicken(characterX, characterY, 0.9);
+  madicken(characterX, characterY);
   if (gameState === true) {
     if (keyIsDown(32)) {
       gravity = -1;
@@ -271,8 +244,9 @@ function gameScreen(x, y) {
     velocity = velocity + gravity;
     characterY = characterY + velocity;
 
-    shadowWidth = (characterY / 750) * 200;
-    shadowHeight = (characterY / 750) * 40;
+    //the width/height of the shadow and the velocity
+    shadowWidth = (characterY / 500) * 200;
+    shadowHeight = (characterY / 500) * 40;
   }
   if (y > 345) {
     gameState = false;
@@ -311,7 +285,18 @@ function deadScreen() {
   fill(255, 0, 0);
   textSize(75);
   textFont("Arial");
-  text("You crashed", 100, 150);
+  text("You crashed!", 100, 150);
+
+  //if you crash, colors will change on some elements
+  if (state === "lost") {
+    skyColor = color(200, 200, 200);
+  }
+  if (state === "lost") {
+    sunColor = color(255, 255, 255);
+  }
+  if (state === "lost") {
+    grassColor = color(15, 155, 15);
+  }
 }
 
 function wonScreen() {
@@ -336,9 +321,8 @@ function wonScreen() {
   textFont("Arial");
   text("Play again", 300, 255);
 
-  //character slides from right to left
+  //character position and how it slides from right to left
   madicken(characterX, characterY - 10);
-
   if (characterX >= 200) characterX = characterX - 3;
 }
 
@@ -353,11 +337,13 @@ function draw() {
     wonScreen();
   }
 
-  if (characterY > 345 && velocity < 3) {
-    state = "win";
-  }
-  if (characterY > 345 && velocity > 3) {
-    state = "lost";
+  if (state !== "start") {
+    if (characterY > 345 && velocity < 3) {
+      state = "win";
+    }
+    if (characterY > 345 && velocity > 3) {
+      state = "lost";
+    }
   }
 }
 
@@ -370,6 +356,10 @@ function mouseClicked() {
     mouseY <= y + 30
   ) {
     state = "game";
+    characterY = 0;
+    characterX = 350;
+    velocity = 0.6;
+    gravity = 0.15;
   }
   if (
     state === "lost" &&
@@ -379,6 +369,13 @@ function mouseClicked() {
     mouseY <= y + 30
   ) {
     state = "game";
+    characterY = 0;
+    characterX = 350;
+    velocity = 0.6;
+    gravity = 0.15;
+    skyColor = color(204, 255, 255);
+    sunColor = color(255, 255, 204);
+    grassColor = color(153, 255, 153);
   }
   if (
     state === "win" &&
@@ -388,5 +385,9 @@ function mouseClicked() {
     mouseY <= y + 30
   ) {
     state = "game";
+    characterY = 0;
+    characterX = 350;
+    velocity = 0.6;
+    gravity = 0.15;
   }
 }
